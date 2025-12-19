@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -33,12 +34,14 @@ export default function Home() {
             </div>
 
             <div className="mt-8 flex justify-center">
+              <Link href="/home">
               <button
                 className="w-37.5 p-3 bg-black text-white font-bold hover:bg-gray-950 cursor-pointer"
                 type="submit"
               >
                 Entrar
               </button>
+              </Link>
             </div>
             <div className="mt-4 text-center">
               <a href="/register" className="text-emerald-500 hover:underline">
