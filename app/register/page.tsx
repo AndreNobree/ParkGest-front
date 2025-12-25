@@ -1,6 +1,41 @@
 "use client";
 
+import { useState } from "react";
+
 export default function Register() {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleRegister = async () => {
+        try {
+        const response = await fetch("http://localhost:8080/auth/register", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+            email,
+            username,
+            password,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Erro ao registrar usuário");
+        }
+
+        const data = await response.json();
+
+        localStorage.setItem("token", data.token);
+        document.cookie = `token=${data.token}; path=/;`;
+
+        window.location.href = "/home";
+
+        } catch (err) {
+        alert(err);
+        }
+    };
   return (
     <div className="w-full min-h-screen bg-emerald-600 flex items-center relative">
       
@@ -18,7 +53,9 @@ export default function Register() {
               </label>
               <input
                 className="ml-5 p-3 w-87.5 border-2 border-black outline-none focus:border-4 text-black"
-                type="email"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
 
@@ -29,6 +66,8 @@ export default function Register() {
               <input
                 className="ml-5 p-3 w-87.5 border-2 border-black outline-none focus:border-4 text-black"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -39,13 +78,16 @@ export default function Register() {
               <input
                 className="ml-5 p-3 w-87.5 border-2 border-black outline-none focus:border-4 text-black"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
             <div className="mt-8 flex justify-center">
               <button
                 className="w-37.5 p-3 bg-black text-white font-bold hover:bg-gray-950 cursor-pointer"
-                type="submit"
+                type="button"
+                onClick={handleRegister}
               >
                 Entrar
               </button>
