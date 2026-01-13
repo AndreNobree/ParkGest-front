@@ -7,6 +7,10 @@ export default function Home() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Por favor, preencha todos os campos.");
+      return;
+    }
     try {
       const response = await fetch("http://localhost:8080/auth/login", {
         method: "POST",
@@ -19,19 +23,16 @@ export default function Home() {
         }),
       });
 
-      console.log("RESPONSE0:");
       if (!response.ok) {
         throw new Error("Login inválido");
       }
-      console.log("RESPONSE:");
       const data = await response.json();
-      console.log("RESPONSEs:");
       console.log("TOKEN:", data.token);
 
       localStorage.setItem("token", data.token);
       document.cookie = `token=${data.token}; path=/;`;
 
-      window.location.href = "/controle";
+      window.location.href = "/home";
 
     } catch (err) {
       alert(err);
@@ -56,6 +57,7 @@ export default function Home() {
               <input
                 className="ml-5 p-3 w-87.5 border-2 border-black outline-none focus:border-4 text-black"
                 type="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -68,6 +70,7 @@ export default function Home() {
               <input
                 className="ml-5 p-3 w-87.5 border-2 border-black outline-none focus:border-4 text-black"
                 type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

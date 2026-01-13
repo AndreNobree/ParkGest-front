@@ -8,7 +8,11 @@ export default function Register() {
   const [password, setPassword] = useState("");
 
   const handleRegister = async () => {
-        try {
+    if (!email || !username || !password) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+    }
+      try {
         const response = await fetch("http://localhost:8080/auth/register", {
             method: "POST",
             headers: {
@@ -21,6 +25,7 @@ export default function Register() {
             }),
         });
 
+        console.error("Erro na resposta do servidor:");
         if (!response.ok) {
             throw new Error("Erro ao registrar usuário");
         }
@@ -32,9 +37,9 @@ export default function Register() {
 
         window.location.href = "/home";
 
-        } catch (err) {
+      } catch (err) {
         alert(err);
-        }
+      }
     };
   return (
     <div className="w-full min-h-screen bg-emerald-600 flex items-center relative">

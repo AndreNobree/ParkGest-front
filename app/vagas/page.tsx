@@ -1,10 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from '../../componets/header';
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Vagas() {
+    const { loading } = useAuth();
+    if (loading) return <p>Carregando...</p>;
+    
+
     const [open, setOpen] = useState(false);
+    const [nomeVaga, setNomeVaga] = useState("");
+    const [tipoVaga, setTipoVaga] = useState("");
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "/";
+            return;
+        }
+    }, []);
+
+   
+    const handleSalvarVaga = async () => {
+        if (!nomeVaga || !tipoVaga) {
+            alert("Preencha todos os campos");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch("http://localhost:8080/vagas/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                nome: nomeVaga,
+                tipo: tipoVaga,
+            }),
+            });
+
+            if (!response.ok) {
+            throw new Error("Erro ao cadastrar vaga");
+            }
+
+            alert("Vaga cadastrada com sucesso!");
+
+            // limpa e fecha modal
+            setNomeVaga("");
+            setTipoVaga("");
+            setOpen(false);
+
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+
     return (
         <div className="w-full min-h-screen bg-white relative">
         <Header />
@@ -48,9 +103,11 @@ export default function Vagas() {
                         Nome da vaga
                         </label>
                         <input
-                        type="text"
-                        placeholder="Ex: A01, B12, C5"
-                        className="text-black w-full p-2 border-2 border-black rounded-md outline-none focus:border-emerald-600"
+                            type="text"
+                            placeholder="Ex: A01, B12, C5"
+                            className="text-black w-full p-2 border-2 border-black rounded-md outline-none focus:border-emerald-600"
+                            value={nomeVaga}
+                            onChange={(e) => setNomeVaga(e.target.value)}
                         />
                     </div>
 
@@ -58,11 +115,15 @@ export default function Vagas() {
                         <label className="block text-sm font-medium text-black mb-1">
                         Tipo da vaga
                         </label>
-                        <select className="text-black w-full p-2 border-2 border-black rounded-md outline-none focus:border-emerald-600">
-                        <option value="">Selecione</option>
-                        <option value="moto">Vagas para Motos</option>
-                        <option value="carro">Vagas para Carros</option>
-                        <option value="caminhao">Vagas para Caminhões</option>
+                        <select
+                            className="text-black w-full p-2 border-2 border-black rounded-md outline-none focus:border-emerald-600"
+                            value={tipoVaga}
+                            onChange={(e) => setTipoVaga(e.target.value)}
+                        >
+                            <option value="">Selecione</option>
+                            <option value="moto">Vagas para Motos</option>
+                            <option value="carro">Vagas para Carros</option>
+                            <option value="caminhao">Vagas para Caminhões</option>
                         </select>
                     </div>
 
@@ -73,7 +134,10 @@ export default function Vagas() {
                         >
                         Cancelar
                         </button>
-                        <button className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-md cursor-pointer hover:bg-emerald-700">
+                        <button 
+                            onClick={handleSalvarVaga}
+                            className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-md cursor-pointer hover:bg-emerald-700"
+                        >
                         Salvar
                         </button>
                     </div>

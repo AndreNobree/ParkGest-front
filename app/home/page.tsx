@@ -1,8 +1,48 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Header from '../../componets/header';
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+    const { loading } = useAuth();   
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("Token não encontrado. Por favor, faça login novamente.");
+                    window.location.href = "/";
+                    return;
+                }
+                const response = await fetch("http://localhost:8080/patio/", {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar dados do pátio");
+                }
+                
+                const data = await response.json();
+                console.log("Dados do pátio:", data);
+            } catch (err: any) {
+                console.error(err);
+                alert("Erro: " + err.message);
+                window.location.href = "/";
+            }
+        };
+        fetchData();
+    }, []);
+    if (loading) {
+        return (
+        <div className="w-full min-h-screen flex items-center justify-center">
+            <p className="text-emerald-600">Carregando...</p>
+        </div>
+        );
+    }
     return (
         <div className='w-full min-h-screen bg-white'>
             <Header />

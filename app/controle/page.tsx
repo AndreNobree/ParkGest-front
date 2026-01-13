@@ -1,8 +1,59 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Header from '../../componets/header';
 
 export default function Controle() {
+    const [placa, setPlaca] = useState("");
+    const [tipoVeiculo, setTipoVeiculo] = useState("");
+    const [vaga, setVaga] = useState("");
+    const [cliente, setCliente] = useState("");
+  
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "/";
+            return;
+        }
+    }, []);
+
+    const handleAddControle = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch("http://localhost:8080/patio/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                placa,
+                tipo: tipoVeiculo,
+                vaga,
+                cliente,
+            }),
+            });
+
+            if (!response.ok) {
+            throw new Error("Erro ao registrar entrada");
+            }
+
+            alert("Entrada registrada com sucesso!");
+            
+            setPlaca("");
+            setTipoVeiculo("");
+            setVaga("");
+            setCliente("");
+
+        } catch (err: any) {
+            alert(err.message);
+        }
+        };
+
+
     return (
         <div className='w-full min-h-screen bg-white'>
             <Header />
@@ -13,31 +64,56 @@ export default function Controle() {
                 </div>
                 <div className='mt-5 pl-10 pr-10 w-full flex justify-between items-center'>
                     <div className='w-130 border-2 border-black'>
-                        <form className='p-5'>
+                        <form className='p-5' onSubmit={handleAddControle}>
                             <div className='mb-5'>
                                 <label className='block text-black font-bold mb-2'>Placa do Veículo</label>
-                                <input type='text' className='w-full p-2 border-2 border-gray-300 text-black' placeholder='Digite a placa do veículo' />
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border-2 border-gray-300 text-black"
+                                    placeholder="Digite a placa do veículo"
+                                    value={placa}
+                                    onChange={(e) => setPlaca(e.target.value)}
+                                />
+
                             </div>
                             <div className='mb-5'>
                                 <label className='block text-black font-bold mb-2'>Tipo de Veículo</label>
-                                <select className='w-full p-2 border-2 border-gray-300 text-black'>
-                                    <option value='moto'>Moto</option>
-                                    <option value='carrop'>Carro Pequeno</option>
-                                    <option value='suv'>Carro Médio</option>
-                                    <option value='caminhonet'>Carro Grande</option>
-                                    <option value='caminhao'>Caminhão</option>
+                                <select
+                                    className="w-full p-2 border-2 border-gray-300 text-black"
+                                    value={tipoVeiculo}
+                                    onChange={(e) => setTipoVeiculo(e.target.value)}
+                                    >
+                                    <option value="">Selecione</option>
+                                    <option value="moto">Moto</option>
+                                    <option value="carro_pequeno">Carro Pequeno</option>
+                                    <option value="suv">Carro Médio</option>
+                                    <option value="caminhonete">Carro Grande</option>
+                                    <option value="caminhao">Caminhão</option>
                                 </select>
+
                             </div>
                             <div className='mb-5'>
                                 <label className='block text-black font-bold mb-2'>Vaga (opcional)</label>
-                                <input type='text' className='w-full p-2 border-2 border-gray-300 text-black' />
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border-2 border-gray-300 text-black"
+                                    value={vaga}
+                                    onChange={(e) => setVaga(e.target.value)}
+                                />
+
                             </div>
                             <div className='mb-5'>
                                 <label className='block text-black font-bold mb-2'>Cliente (opcional)</label>
-                                <input type='text' className='w-full p-2 border-2 border-gray-300 text-black' />
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border-2 border-gray-300 text-black"
+                                    value={cliente}
+                                    onChange={(e) => setCliente(e.target.value)}
+                                />
+
                             </div>
                             <div>
-                                <input type='submit' value='Registrar Entrada' className='w-full p-2 bg-emerald-600 text-white font-bold cursor-pointer hover:bg-emerald-700' />
+                                <input type='button' value='Registrar Entrada' className='w-full p-2 bg-emerald-600 text-white font-bold cursor-pointer hover:bg-emerald-700' />
                             </div>
                         </form>
                     </div>
