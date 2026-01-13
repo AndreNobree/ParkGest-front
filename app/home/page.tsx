@@ -4,8 +4,19 @@ import { useEffect, useState } from "react";
 import Header from '../../componets/header';
 import { useAuth } from "@/hooks/useAuth";
 
+type PatioDTO = {
+        patioId: number;
+        modeloCor: string;
+        placa: string;
+        tipo: string;
+        horaEntrada: string;
+        acao: string;
+        nomeVaga: string;
+        clienteId: number | null;
+};
 export default function Home() {
     const { loading } = useAuth();   
+    const [patios, setPatios] = useState<PatioDTO[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,8 +37,8 @@ export default function Home() {
                     throw new Error("Erro ao buscar dados do pátio");
                 }
                 
-                const data = await response.json();
-                console.log("Dados do pátio:", data);
+                const data: PatioDTO[] = await response.json();
+                setPatios(data);
             } catch (err: any) {
                 console.error(err);
                 alert("Erro: " + err.message);
@@ -62,34 +73,52 @@ export default function Home() {
                         </thead>
 
                         <tbody className="bg-white text-black">
-                            <tr>
-                                <td className="p-3 text-left border-b-2">01</td>
-                                <td className="p-3 text-left border-b-2"><a className='underline cursor-pointer'>ABC-1234</a></td>
-                                <td className="p-3 text-left border-b-2">Ford Ka</td>
-                                <td className="p-3 text-left border-b-2">Carro</td>
-                                <td className="p-3 text-left border-b-2">12:56</td>
-                                <td className="p-3 text-left border-b-2">João Silva</td>
-                                <td className="p-3 text-right border-b-2">
-                                    <button className="bg-red-500 p-2 rounded-lg text-white cursor-pointer">
-                                        Finalizar
-                                    </button>
-                                </td>
-                            </tr>
+                            {patios.length === 0 && (
+                                <tr>
+                                    <td colSpan={7} className="p-4 text-center">
+                                        Nenhum veículo estacionado
+                                    </td>
+                                </tr>
+                            )}
 
-                            <tr>
-                                <td className="p-3 text-left border-b-2">02</td>
-                                <td className="p-3 text-left border-b-2"><a className='underline cursor-pointer'>XYZ-5678</a></td>
-                                <td className="p-3 text-left border-b-2">Honda CG</td>
-                                <td className="p-3 text-left border-b-2">Moto</td>
-                                <td className="p-3 text-left border-b-2">15:10</td>
-                                <td className="p-3 text-left border-b-2">Maria Souza</td>
-                                <td className="p-3 text-right border-b-2">
-                                <button className="bg-red-500 p-2 rounded-lg text-white cursor-pointer">
-                                    Finalizar
-                                </button>
-                                </td>
-                            </tr>
+                            {patios.map((patio) => (
+                                <tr key={patio.patioId}>
+                                    <td className="p-3 border-b-2">{patio.nomeVaga}</td>
+
+                                    <td className="p-3 border-b-2">
+                                        <a className="underline cursor-pointer">
+                                            {patio.placa ?? "—"}
+                                        </a>
+                                    </td>
+
+                                    <td className="p-3 border-b-2">
+                                        {patio.modeloCor ?? "—"}
+                                    </td>
+
+                                    <td className="p-3 border-b-2">
+                                        {patio.tipo ?? "—"}
+                                    </td>
+
+                                    <td className="p-3 border-b-2">
+                                        {new Date(patio.horaEntrada).toLocaleTimeString("pt-BR", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </td>
+
+                                    <td className="p-3 border-b-2">
+                                        {patio.clienteId ?? "—"}
+                                    </td>
+
+                                    <td className="p-3 text-right border-b-2">
+                                        <button className="bg-red-500 p-2 rounded-lg text-white cursor-pointer">
+                                            Finalizar
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
+
 
                     </table>
                     </div>

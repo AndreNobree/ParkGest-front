@@ -5,9 +5,7 @@ import Header from '../../componets/header';
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Vagas() {
-    const { loading } = useAuth();
-    if (loading) return <p>Carregando...</p>;
-    
+    const { loading } = useAuth();   
 
     const [open, setOpen] = useState(false);
     const [nomeVaga, setNomeVaga] = useState("");
@@ -17,9 +15,10 @@ export default function Vagas() {
         const token = localStorage.getItem("token");
         if (!token) {
             window.location.href = "/";
-            return;
         }
     }, []);
+
+    if (loading) return <p>Carregando...</p>;
 
    
     const handleSalvarVaga = async () => {
@@ -38,7 +37,7 @@ export default function Vagas() {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                nome: nomeVaga,
+                vaga: nomeVaga,
                 tipo: tipoVaga,
             }),
             });

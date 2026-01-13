@@ -15,7 +15,7 @@ export function useAuth() {
       }
 
       try {
-        const response = await fetch("http://localhost:8080/patio", {
+        const response = await fetch("http://localhost:8080/patio/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
