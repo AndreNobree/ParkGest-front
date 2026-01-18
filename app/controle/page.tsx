@@ -60,7 +60,7 @@ export default function Controle() {
         try {
             const token = localStorage.getItem("token");
 
-            const response = await fetch("http://localhost:8080/patio/register", {
+            const response = await fetch("http://localhost:8080/patio/add", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
