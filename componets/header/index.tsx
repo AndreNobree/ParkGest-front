@@ -13,6 +13,7 @@ export default function Header() {
   const isEstacionamento = pathname === "/home";
   const isControle = pathname === "/controle";
   const isVagas = pathname === "/vagas";
+  const isClientes = pathname === "/clientes";
 
   const active =
     "p-2 bg-emerald-600 border-2 border-black mr-5 text-white font-medium";
@@ -57,11 +58,13 @@ export default function Header() {
           />
         </Link>
 
-        <input
-          type="button"
-          value="Clientes"
-          className={inactive}
-        />
+        <Link href="/clientes">
+          <input
+            type="button"
+            value="Clientes"
+            className={isClientes ? active : inactive}
+          />
+        </Link>
         
         <input
           type="button"

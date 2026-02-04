@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import Header from "../../componets/header";
 import { useAuth } from "@/hooks/useAuth";
 
-type VagaDTO = {
+type ClientesDTO = {
     id: number;
-    vaga: string;
-    tipo: string;
+    nome: string;
+    telefone: string;
     acao: string;
 };
 
@@ -16,17 +16,17 @@ export default function Vagas() {
 
     const [open, setOpen] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [vagaSelecionada, setVagaSelecionada] = useState<VagaDTO | null>(null);
+    const [clienteSelecionado, setClienteSelecionado] = useState<ClientesDTO | null>(null);
 
-    const [nomeVaga, setNomeVaga] = useState("");
-    const [tipoVaga, setTipoVaga] = useState("");
-    const [vagas, setVagas] = useState<VagaDTO[]>([]);
+    const [nome, setNome] = useState("");
+    const [telefone, setTelefone] = useState("");
+    const [clientes, setClientes] = useState<ClientesDTO[]>([]);
 
     useEffect(() => {
-        fetchVagas();
+        fetchClientes();
     }, []);
 
-    const fetchVagas = async () => {
+    const fetchClientes = async () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -34,21 +34,21 @@ export default function Vagas() {
                 return;
             }
 
-            const response = await fetch("http://localhost:8080/vagas/all", {
+            const response = await fetch("http://localhost:8080/clientes/all", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            if (!response.ok) throw new Error("Erro ao buscar vagas");
+            if (!response.ok) throw new Error("Erro ao buscar clientes");
 
-            const data: VagaDTO[] = await response.json();
-            setVagas(data);
+            const data: ClientesDTO[] = await response.json();
+            setClientes(data);
         } catch (err: any) {
             alert(err.message);
         }
     };
 
-    const handleSalvarVaga = async () => {
-        if (!nomeVaga || !tipoVaga) {
+    const handleSalvarCliente = async () => {
+        if (!nome || !telefone) {
             alert("Preencha todos os campos");
             return;
         }
@@ -57,7 +57,7 @@ export default function Vagas() {
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-                "http://localhost:8080/vagas/register",
+                "http://localhost:8080/clientes/register",
                 {
                     method: "POST",
                     headers: {
@@ -65,31 +65,31 @@ export default function Vagas() {
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
-                        vaga: nomeVaga,
-                        tipo: tipoVaga,
+                        nome: nome,
+                        telefone: telefone,
                     }),
                 }
             );
 
-            if (!response.ok) throw new Error("Erro ao cadastrar vaga");
+            if (!response.ok) throw new Error("Erro ao cadastrar cliente");
 
-            setNomeVaga("");
-            setTipoVaga("");
+            setNome("");
+            setTelefone("");
             setOpen(false);
-            fetchVagas();
+            fetchClientes();
         } catch (err: any) {
             alert(err.message);
         }
     };
 
-    const handleDeleteVaga = async () => {
-        if (!vagaSelecionada) return;
+    const handleDeleteCliente = async () => {
+        if (!clienteSelecionado) return;
 
         try {
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-                `http://localhost:8080/vagas/${vagaSelecionada.id}`,
+                `http://localhost:8080/clientes/${clienteSelecionado.id}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -98,33 +98,17 @@ export default function Vagas() {
                 }
             );
 
-            if (!response.ok) throw new Error("Erro ao excluir vaga");
+            if (!response.ok) throw new Error("Erro ao excluir cliente");
 
             setOpenDelete(false);
-            setVagaSelecionada(null);
-            fetchVagas();
+            setClienteSelecionado(null);
+            fetchClientes();
         } catch (err: any) {
             alert(err.message);
         }
     };
 
     if (loading) return <p>Carregando...</p>;
-
-    
-    const totalVagas = vagas.length;
-
-    const vagasLivres = vagas.filter(
-        (vaga) => vaga.acao.toUpperCase() === "LIVRE"
-    ).length;
-
-    const vagasOcupadas = vagas.filter(
-        (vaga) => vaga.acao.toUpperCase() === "OCUPADA"
-    ).length;
-
-    const taxaOcupacao =
-        totalVagas === 0
-            ? 0
-            : ((vagasOcupadas / totalVagas) * 100).toFixed(1);
 
     return (
         
@@ -134,10 +118,10 @@ export default function Vagas() {
             <div className="w-full mt-10 flex justify-between">
                 <div className="w-7xl pl-10">
                     <h1 className="text-3xl font-bold text-black">
-                        Controle de Vagas
+                        Controle de Clientes
                     </h1>
                     <p className="text-gray-500">
-                        Visualize a ocupação do estacionamento
+                        Lista de clientes cadastrados no sistema
                     </p>
                 </div>
 
@@ -146,7 +130,7 @@ export default function Vagas() {
                     className="w-40 p-1 mr-10 border-2 border-black rounded-md flex items-center justify-center bg-emerald-600 text-white font-bold hover:bg-emerald-700 cursor-pointer"
                 >
                     <img src="/mais.png" className="w-6 h-6 mr-2" />
-                    Nova Vaga
+                    Novo Cliente
                 </button>
             </div>
 
@@ -160,39 +144,35 @@ export default function Vagas() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                         <div className="bg-white w-100 rounded-lg border-3 border-emerald-600 p-6 shadow-xl">
                             <h2 className="text-2xl font-bold text-emerald-600 mb-6 text-center">
-                                Adicionar Vaga
+                                Adicionar Cliente
                             </h2>
 
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-black mb-1">
-                                    Nome da vaga
+                                    Nome
                                 </label>
                                 <input
                                     className="text-black w-full p-2 border-2 border-black rounded-md"
-                                    value={nomeVaga}
-                                    placeholder="Digite o nome da vaga"
+                                    value={nome}
+                                    placeholder="Digite o nome do cliente"
                                     onChange={(e) =>
-                                        setNomeVaga(e.target.value)
+                                        setNome(e.target.value)
                                     }
                                 />
                             </div>
 
                             <div className="mb-6">
                                 <label className="block text-sm font-medium text-black mb-1">
-                                    Tipo da vaga
+                                    Telefone
                                 </label>
-                                <select
+                                <input
                                     className="text-black w-full p-2 border-2 border-black rounded-md"
-                                    value={tipoVaga}
+                                    value={telefone}
+                                    placeholder="Digite o telefone do cliente"
                                     onChange={(e) =>
-                                        setTipoVaga(e.target.value)
+                                        setTelefone(e.target.value)
                                     }
-                                >
-                                    <option value="">Selecione</option>
-                                    <option value="MOTO">Moto</option>
-                                    <option value="CARRO">Carro</option>
-                                    <option value="CAMINHAO">Caminhão</option>
-                                </select>
+                                />
                             </div>
 
                             <div className="flex justify-end gap-3">
@@ -203,7 +183,7 @@ export default function Vagas() {
                                     Cancelar
                                 </button>
                                 <button
-                                    onClick={handleSalvarVaga}
+                                    onClick={handleSalvarCliente}
                                     className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-md cursor-pointer"
                                 >
                                     Salvar
@@ -214,60 +194,30 @@ export default function Vagas() {
                 </>
             )}
             
-            <div className='w-full mt-5 flex justify-between align-center px-10 gap-5'>
-                <div className='w-70 h-30 border-2 border-black bg-emerald-600 flex flex-col justify-center items-center'>
-                    <p className='font-bold text-3xl'>{vagasLivres}</p>
-                    <p className='text-white text-sm'>Vagas Livres</p>
-                </div>
-
-                <div className='w-70 h-30 border-2 border-black bg-emerald-600 flex flex-col justify-center items-center'>
-                    <p className='font-bold text-3xl'>{vagasOcupadas}</p>
-                    <p className='text-white text-sm'>Vagas Ocupadas</p>
-                </div>
-
-                <div className='w-70 h-30 border-2 border-black bg-emerald-600 flex flex-col justify-center items-center'>
-                    <p className='font-bold text-3xl'>{totalVagas}</p>
-                    <p className='text-white text-sm'>Total de Vagas</p>
-                </div>
-
-                <div className='w-70 h-30 border-2 border-black bg-emerald-600 flex flex-col justify-center items-center'>
-                    <p className='font-bold text-3xl'>{taxaOcupacao}%</p>
-                    <p className='text-white text-sm'>Taxa Ocupação</p>
-                </div>
-            </div>
             <div className="w-full mt-5 px-10">
                 <table className="w-full border-collapse border border-black">
                     <thead className="bg-emerald-600 text-white">
                         <tr>
-                            <th className="border px-5 py-2 border-black">Vaga</th>
-                            <th className="border px-5 py-2 border-black">Tipo</th>
-                            <th className="border px-5 py-2 border-black">Status</th>
+                            <th className="border px-5 py-2 border-black">Nome</th>
+                            <th className="border px-5 py-2 border-black">Telefone</th>
                             <th className="border px-5 py-2 border-black">Ação</th>
                         </tr>
                     </thead>
 
                     <tbody className="text-black">
-                        {vagas.map((vaga) => (
-                            <tr key={vaga.id}>
+                        {clientes.map((cliente) => (
+                            <tr key={cliente.id}>
                                 <td className="border px-4 py-2 text-center">
-                                    {vaga.vaga.toUpperCase()}
+                                    {cliente.nome}
                                 </td>
                                 <td className="border px-4 py-2 text-center">
-                                    {vaga.tipo.toUpperCase()}
+                                    {cliente.telefone}
                                 </td>
-                                <td
-                                    className={`border px-4 py-2 text-center font-bold ${
-                                        vaga.acao === "LIVRE"
-                                            ? "text-green-600"
-                                            : "text-red-600"
-                                    }`}
-                                >
-                                    {vaga.acao.toUpperCase()}
-                                </td>
+                                
                                 <td className="border px-4 py-2 text-center">
                                     <button
                                         onClick={() => {
-                                            setVagaSelecionada(vaga);
+                                            setClienteSelecionado(cliente);
                                             setOpenDelete(true);
                                         }}
                                     >
@@ -284,7 +234,7 @@ export default function Vagas() {
                 </table>
             </div>
 
-            {openDelete && vagaSelecionada && (
+            {openDelete && clienteSelecionado && (
                 <>
                     <div
                         className="fixed inset-0 bg-black/60 z-40"
@@ -298,8 +248,8 @@ export default function Vagas() {
                             </h2>
 
                             <p className="text-center text-black mb-6">
-                                Deseja apagar a vaga{" "}
-                                <strong>{vagaSelecionada.vaga}</strong>?
+                                Deseja excluir o cliente{" "}
+                                <strong>{clienteSelecionado.nome}</strong>?
                             </p>
 
                             <div className="flex justify-end gap-3">
@@ -310,7 +260,7 @@ export default function Vagas() {
                                     Cancelar
                                 </button>
                                 <button
-                                    onClick={handleDeleteVaga}
+                                    onClick={handleDeleteCliente}
                                     className="px-4 py-2 bg-red-600 text-white font-bold rounded-md cursor-pointer"
                                 >
                                     Apagar

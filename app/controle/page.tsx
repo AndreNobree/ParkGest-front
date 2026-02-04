@@ -13,9 +13,15 @@ export default function Controle() {
     const [modeloCor, setModeloCor] = useState("");
     const [cliente, setCliente] = useState("");
     const [tipoVaga, setTipoVaga] = useState<string>("");
+    const [searchVaga, setSearchVaga] = useState("");
+    const [openVagaDropdown, setOpenVagaDropdown] = useState(false);
 
     const [vagas, setVagas] = useState<Vaga[]>([]);
     const [vagaSelecionada, setVagaSelecionada] = useState<string>("");
+
+    const vagasFiltradas = vagas.filter((vaga) =>
+        vaga.vaga.toLowerCase().includes(searchVaga.toLowerCase())
+    );
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -28,7 +34,7 @@ export default function Controle() {
 
     const fetchVagas = async (token: string) => {
         try {
-            const response = await fetch("http://localhost:8080/vagas/all", {
+            const response = await fetch("http://localhost:8080/vagas/livres", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -144,26 +150,51 @@ export default function Controle() {
                                 <label className="block font-bold mb-2 text-black">
                                     Vaga (opcional)
                                 </label>
-                                <select
-                                    className="w-full p-2 border-2 border-gray-300 text-black"
-                                    value={vagaSelecionada}
-                                    onChange={(e) =>
-                                        setVagaSelecionada(e.target.value)
-                                    }
-                                >
-                                    <option value="">
-                                        Selecione uma vaga
-                                    </option>
-                                    {vagas.map((vaga) => (
-                                        <option
-                                            key={vaga.id}
-                                            value={vaga.id}
-                                        >
-                                            {vaga.vaga}
-                                        </option>
-                                    ))}
-                                </select>
+
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 border-2 border-gray-300 text-black"
+                                        placeholder="Pesquisar vaga..."
+                                        value={searchVaga}
+                                        onFocus={() => setOpenVagaDropdown(true)}
+                                        onBlur={() => {
+                                            setTimeout(() => setOpenVagaDropdown(false), 150);
+                                        }}
+                                        onChange={(e) => {
+                                            setSearchVaga(e.target.value);
+                                            setOpenVagaDropdown(true);
+                                        }}
+                                    />
+
+
+                                    {openVagaDropdown && (
+                                        <div className="absolute z-20 w-full bg-white border-2 border-gray-300 max-h-40 overflow-y-auto">
+                                            {vagasFiltradas.length === 0 && (
+                                                <div className="p-2 text-gray-500">
+                                                    Nenhuma vaga encontrada
+                                                </div>
+                                            )}
+
+                                            {vagasFiltradas.map((vaga) => (
+                                                <div
+                                                    key={vaga.id}
+                                                    className="p-2 cursor-pointer hover:bg-emerald-100 text-black"
+                                                    onMouseDown={() => {
+                                                        setVagaSelecionada(String(vaga.id));
+                                                        setSearchVaga(vaga.vaga);
+                                                        setOpenVagaDropdown(false);
+                                                    }}
+                                                >
+                                                    {vaga.vaga}
+                                                </div>
+                                            ))}
+
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
 
                             <div className="mb-5">
                                 <label className="block font-bold mb-2 text-black ">
