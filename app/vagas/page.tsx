@@ -94,6 +94,11 @@ export default function Vagas() {
     const handleEditarConfirmar = async () => {
         if (!vagaSelecionada) return;
 
+        if (!nomeVaga || !tipoVaga) {
+            alert("Preencha todos os campos");
+            return;
+        }
+
         try {
             const token = localStorage.getItem("token");
 
@@ -106,8 +111,8 @@ export default function Vagas() {
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
-                        nomeVaga,
-                        tipoVaga
+                        vaga: nomeVaga,
+                        tipo: tipoVaga,
                     }),
                 }
             );
