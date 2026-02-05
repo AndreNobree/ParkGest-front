@@ -17,10 +17,30 @@ export default function Vagas() {
     const [open, setOpen] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
     const [clienteSelecionado, setClienteSelecionado] = useState<ClientesDTO | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+
 
     const [nome, setNome] = useState("");
     const [telefone, setTelefone] = useState("");
     const [clientes, setClientes] = useState<ClientesDTO[]>([]);
+
+    const handleEditarCliente = (cliente: ClientesDTO) => {
+        setClienteSelecionado(cliente);
+        setNome(cliente.nome);
+        setTelefone(cliente.telefone);
+        setIsEditing(true);
+        setOpen(true);
+    };
+
+
+    const maskTelefone = (value: string) => {
+        return value
+            .replace(/\D/g, "")               // remove tudo que não é número
+            .replace(/^(\d{2})(\d)/, "($1) $2")
+            .replace(/(\d{5})(\d)/, "$1-$2")
+            .replace(/(-\d{4})\d+?$/, "$1");  // limita em 11 dígitos
+    };
+
 
     useEffect(() => {
         fetchClientes();
@@ -81,6 +101,41 @@ export default function Vagas() {
             alert(err.message);
         }
     };
+
+    const handleEditarConfirmar = async () => {
+        if (!clienteSelecionado) return;
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+                `http://localhost:8080/clientes/${clienteSelecionado.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        nome,
+                        telefone: telefone.replace(/\D/g, ""),
+                    }),
+                }
+            );
+
+            if (!response.ok) throw new Error("Erro ao editar cliente");
+
+            setOpen(false);
+            setIsEditing(false);
+            setClienteSelecionado(null);
+            setNome("");
+            setTelefone("");
+            fetchClientes();
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
 
     const handleDeleteCliente = async () => {
         if (!clienteSelecionado) return;
@@ -144,8 +199,9 @@ export default function Vagas() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                         <div className="bg-white w-100 rounded-lg border-3 border-emerald-600 p-6 shadow-xl">
                             <h2 className="text-2xl font-bold text-emerald-600 mb-6 text-center">
-                                Adicionar Cliente
+                                {isEditing ? "Deseja editar o Cliente?" : "Adicionar Cliente"}
                             </h2>
+
 
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-black mb-1">
@@ -168,26 +224,36 @@ export default function Vagas() {
                                 <input
                                     className="text-black w-full p-2 border-2 border-black rounded-md"
                                     value={telefone}
-                                    placeholder="Digite o telefone do cliente"
+                                    placeholder="(99) 99999-9999"
+                                    maxLength={15}
                                     onChange={(e) =>
-                                        setTelefone(e.target.value)
+                                        setTelefone(maskTelefone(e.target.value))
                                     }
                                 />
+
                             </div>
 
                             <div className="flex justify-end gap-3">
                                 <button
-                                    onClick={() => setOpen(false)}
+                                    onClick={() => {
+                                        setOpen(false);
+                                        setIsEditing(false);
+                                        setClienteSelecionado(null);
+                                        setNome("");
+                                        setTelefone("");
+                                    }}
                                     className="px-4 py-2 border-2 border-black rounded-md text-black cursor-pointer"
                                 >
                                     Cancelar
                                 </button>
+
                                 <button
-                                    onClick={handleSalvarCliente}
+                                    onClick={isEditing ? handleEditarConfirmar : handleSalvarCliente}
                                     className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-md cursor-pointer"
                                 >
-                                    Salvar
+                                    {isEditing ? "Confirmar Edição" : "Salvar"}
                                 </button>
+
                             </div>
                         </div>
                     </div>
@@ -213,8 +279,19 @@ export default function Vagas() {
                                 <td className="border px-4 py-2 text-center">
                                     {cliente.telefone}
                                 </td>
-                                
+
                                 <td className="border px-4 py-2 text-center">
+                                    <button
+                                        onClick={() => handleEditarCliente(cliente)}
+                                        className="mr-5"
+                                    >
+                                        <img
+                                            src="/lapis.png"
+                                            alt="Editar"
+                                            className="w-6 h-6 mx-auto cursor-pointer"
+                                        />
+                                    </button>
+
                                     <button
                                         onClick={() => {
                                             setClienteSelecionado(cliente);

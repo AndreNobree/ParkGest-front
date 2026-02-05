@@ -17,10 +17,19 @@ export default function Vagas() {
     const [open, setOpen] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
     const [vagaSelecionada, setVagaSelecionada] = useState<VagaDTO | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     const [nomeVaga, setNomeVaga] = useState("");
     const [tipoVaga, setTipoVaga] = useState("");
     const [vagas, setVagas] = useState<VagaDTO[]>([]);
+
+    const handleEditarVaga = (vaga: VagaDTO) => {
+        setVagaSelecionada(vaga);
+        setNomeVaga(vaga.vaga);
+        setTipoVaga(vaga.tipo);
+        setIsEditing(true);
+        setOpen(true);
+    };
 
     useEffect(() => {
         fetchVagas();
@@ -76,6 +85,40 @@ export default function Vagas() {
             setNomeVaga("");
             setTipoVaga("");
             setOpen(false);
+            fetchVagas();
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    const handleEditarConfirmar = async () => {
+        if (!vagaSelecionada) return;
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+                `http://localhost:8080/vagas/${vagaSelecionada.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        nomeVaga,
+                        tipoVaga
+                    }),
+                }
+            );
+
+            if (!response.ok) throw new Error("Erro ao editar vaga");
+
+            setOpen(false);
+            setIsEditing(false);
+            setVagaSelecionada(null);
+            setNomeVaga("");
+            setTipoVaga("");
             fetchVagas();
         } catch (err: any) {
             alert(err.message);
@@ -160,7 +203,7 @@ export default function Vagas() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                         <div className="bg-white w-100 rounded-lg border-3 border-emerald-600 p-6 shadow-xl">
                             <h2 className="text-2xl font-bold text-emerald-600 mb-6 text-center">
-                                Adicionar Vaga
+                                {isEditing ? "Deseja editar a vaga?" : "Adicionar Vaga"}
                             </h2>
 
                             <div className="mb-4">
@@ -197,16 +240,22 @@ export default function Vagas() {
 
                             <div className="flex justify-end gap-3">
                                 <button
-                                    onClick={() => setOpen(false)}
+                                    onClick={() => {
+                                        setOpen(false);
+                                        setIsEditing(false);
+                                        setVagaSelecionada(null);
+                                        setNomeVaga("");
+                                        setTipoVaga("");
+                                    }}
                                     className="px-4 py-2 border-2 border-black rounded-md text-black cursor-pointer"
                                 >
                                     Cancelar
                                 </button>
                                 <button
-                                    onClick={handleSalvarVaga}
+                                    onClick={isEditing ? handleEditarConfirmar : handleSalvarVaga}
                                     className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-md cursor-pointer"
                                 >
-                                    Salvar
+                                    {isEditing ? "Confirmar Edição" : "Salvar"}
                                 </button>
                             </div>
                         </div>
@@ -264,7 +313,18 @@ export default function Vagas() {
                                 >
                                     {vaga.acao.toUpperCase()}
                                 </td>
+                                
                                 <td className="border px-4 py-2 text-center">
+                                    <button
+                                        onClick={() => handleEditarVaga(vaga)}
+                                        className="mr-5"
+                                    >
+                                        <img
+                                            src="/lapis.png"
+                                            alt="Editar"
+                                            className="w-6 h-6 mx-auto cursor-pointer"
+                                        />
+                                    </button>
                                     <button
                                         onClick={() => {
                                             setVagaSelecionada(vaga);
