@@ -14,6 +14,7 @@ export default function Header() {
   const isControle = pathname === "/controle";
   const isVagas = pathname === "/vagas";
   const isClientes = pathname === "/clientes";
+  const isConfiguracao = pathname === "/configuracao";
 
   const active =
     "p-2 bg-emerald-600 border-2 border-black mr-5 text-white font-medium";
@@ -66,11 +67,13 @@ export default function Header() {
           />
         </Link>
         
-        <input
-          type="button"
-          value="Configuração"
-          className={inactive}
-        />
+        <Link href="/configuracao">
+          <input
+            type="button"
+            value="Configuração"
+            className={isConfiguracao ? active : inactive}
+          />
+        </Link>
 
         <Link href="/">
           <img src="/saida.png" className="w-6 h-6 mt-2.5 cursor-pointer" />
