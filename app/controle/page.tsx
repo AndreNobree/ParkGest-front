@@ -260,11 +260,11 @@ export default function Controle() {
                         </div><br></br>
 
                         <div
-                            className={cardClass("CAMINHAO_Onibus")}
-                            onClick={() => setTipoVaga("CAMINHAO_Onibus")}
+                            className={cardClass("CAMINHAO_ONIBUS")}
+                            onClick={() => setTipoVaga("CAMINHAO_ONIBUS")}
                         >
                             <img src="/caminhao.png" className="w-6 h-6 mr-5" />
-                            <h2 className=" text-black ">Caminhão/Ônibus</h2>
+                            <h2 className=" text-black ">Caminhão/ÔNIBUS</h2>
                         </div>
                     </div>
                 </div>

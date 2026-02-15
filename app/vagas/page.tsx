@@ -237,9 +237,9 @@ export default function Vagas() {
                                     }
                                 >
                                     <option value="">Selecione</option>
-                                    <option value="MOTO">Moto</option>
-                                    <option value="CARRO">Carro</option>
-                                    <option value="CAMINHAO">Caminhão</option>
+                                    <option value="MOTO">Pequena [Motos]</option>
+                                    <option value="CARRO">Média [Carros Hatch, Sedan e Pick-up]</option>
+                                    <option value="CAMINHAO">Grande [Caminhão/Ônibus]</option>
                                 </select>
                             </div>
 

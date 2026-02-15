@@ -11,6 +11,14 @@ type ClientesDTO = {
     acao: string;
 };
 
+type TipoVeiculo =
+    | "MOTO"
+    | "CARRO_PEQUENO"
+    | "CARRO_MEDIO"
+    | "CARRO_GRANDE"
+    | "CAMINHAO_ONIBUS";
+
+
 export default function Configuracao() {
     const { loading } = useAuth();
 
@@ -18,6 +26,62 @@ export default function Configuracao() {
     const [clienteIdSelecionado, setClienteIdSelecionado] = useState<number | null>(null);
     const [search, setSearch] = useState("");
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [valoresHora, setValoresHora] = useState<Record<TipoVeiculo, string>>({
+        MOTO: "",
+        CARRO_PEQUENO: "",
+        CARRO_MEDIO: "",
+        CARRO_GRANDE: "",
+        CAMINHAO_ONIBUS: "",
+    });
+
+    const handleValorChange = (tipo: TipoVeiculo, valor: string) => {
+        setValoresHora((prev) => ({
+            ...prev,
+            [tipo]: valor,
+        }));
+    };
+
+    const handleSalvarValores = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                window.location.href = "/";
+                return;
+            }
+
+            const valoresArray = Object.entries(valoresHora);
+
+            for (const [tipo, valor] of valoresArray) {
+                if (!valor) continue; // ignora campos vazios
+
+                const response = await fetch(
+                    "http://localhost:8080/valoreshora/add",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            valorHora: Number(valor.replace(",", ".")),
+                            tipoVeiculo: tipo,
+                        }),
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Erro ao salvar ${tipo}`);
+                }
+            }
+
+            alert("Valores salvos com sucesso");
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+
 
     const clienteSelecionado = clientes.find(
         (c) => c.id === clienteIdSelecionado
@@ -83,49 +147,68 @@ export default function Configuracao() {
                             </h1>
                             <input
                                 type="text"
+                                value={valoresHora.MOTO}
+                                onChange={(e) => handleValorChange("MOTO", e.target.value)}
                                 className="w-80 border-2 border-emerald-700 rounded-md text-black"
                                 placeholder="R$ 0,00"
                             />
+
 
                             <h1 className="text-lg font-bold text-black mt-5">
                                 Valor hora de veículo pequeno:
                             </h1>
                             <input
                                 type="text"
+                                value={valoresHora.CARRO_PEQUENO}
+                                onChange={(e) => handleValorChange("CARRO_PEQUENO", e.target.value)}
                                 className="w-80 border-2 border-emerald-700 rounded-md text-black"
                                 placeholder="R$ 0,00"
                             />
+
 
                             <h1 className="text-lg font-bold text-black mt-5">
                                 Valor hora de veículo médio:
                             </h1>
                             <input
                                 type="text"
+                                value={valoresHora.CARRO_MEDIO}
+                                onChange={(e) => handleValorChange("CARRO_MEDIO", e.target.value)}
                                 className="w-80 border-2 border-emerald-700 rounded-md text-black"
                                 placeholder="R$ 0,00"
                             />
+
 
                             <h1 className="text-lg font-bold text-black mt-5">
                                 Valor hora de veículo grande:
                             </h1>
                             <input
                                 type="text"
+                                value={valoresHora.CARRO_GRANDE}
+                                onChange={(e) => handleValorChange("CARRO_GRANDE", e.target.value)}
                                 className="w-80 border-2 border-emerald-700 rounded-md text-black"
                                 placeholder="R$ 0,00"
                             />
+
 
                             <h1 className="text-lg font-bold text-black mt-5">
                                 Valor hora de caminhão/ônibus:
                             </h1>
-                            <input
+                           <input
                                 type="text"
+                                value={valoresHora.CAMINHAO_ONIBUS}
+                                onChange={(e) => handleValorChange("CAMINHAO_ONIBUS", e.target.value)}
                                 className="w-80 border-2 border-emerald-700 rounded-md text-black"
                                 placeholder="R$ 0,00"
                             />
 
-                            <button className="w-80 h-10 mt-5 cursor-pointer bg-emerald-600 text-white font-bold rounded-md hover:bg-emerald-700">
+
+                            <button
+                                onClick={handleSalvarValores}
+                                className="w-80 h-10 mt-5 cursor-pointer bg-emerald-600 text-white font-bold rounded-md hover:bg-emerald-700"
+                            >
                                 Salvar
                             </button>
+
                         </div>
                     </div>
                     <div className="w-100 h-125 ml-10 border-2 border-black">
